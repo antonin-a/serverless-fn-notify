@@ -1,0 +1,33 @@
+{
+  "targetSpec": {
+    "name": "{{NAME}}",
+    "region": "{{REGION}}",
+    "template": {
+      "container": {
+        "image": "devlikeapro/waha:noweb",
+        "port": 3000,
+        "env": [
+          { "name": "WHATSAPP_DEFAULT_ENGINE", "value": "NOWEB" },
+          { "name": "WAHA_CLIENT_DEVICE_NAME", "value": "OVHcloud Serverless notify" },
+          { "name": "WAHA_DASHBOARD_USERNAME", "value": "admin" },
+          { "name": "WAHA_DASHBOARD_PASSWORD", "value": "{{WAHA_API_KEY}}" },
+          { "name": "WAHA_API_KEY", "value": "{{WAHA_API_KEY}}" }
+        ],
+        "protocols": ["HTTP"],
+        "resources": { "cpu": 1, "memory": 1024 },
+        "requestTimeoutSeconds": 60
+      }
+    },
+    "scaling": {
+      "mode": "AUTO",
+      "minInstances": 1,
+      "maxInstances": 1,
+      "concurrencyTarget": 80,
+      "idleTimeoutSeconds": 300
+    },
+    "traffic": [
+      { "latest": true, "weight": 100 }
+    ],
+    "rollbackErrorThreshold": 5
+  }
+}

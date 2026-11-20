@@ -59,6 +59,45 @@ Other services and their URL formats: the Apprise wiki lists more than 100.
 `NOTIFY_URLS` carries tokens: it is a platform secret, and the function only
 ever prints the masked form (`url(privacy=True)`).
 
+## Send to a WhatsApp group with WAHA
+
+The official Cloud API only reaches individuals and business-created groups.
+To post in a group or a community you are a member of, the only route is an
+unofficial WhatsApp Web client. [WAHA](https://waha.devlike.pro) packages one
+behind a REST API, in a container. It is against the WhatsApp terms and a
+number can get banned: use a second number, never your main one.
+
+WAHA runs as a Serverless container next to the function, one instance kept
+alive (the session lives in memory, there is no persistent storage: a restart
+means a new QR scan):
+
+```sh
+export OVH_CLOUD_PROJECT=<project id>
+export WAHA_API_KEY=$(uuidgen | tr -d -)
+scripts/deploy-waha.sh                      # prints the container URL
+```
+
+Then:
+
+1. Open `<waha url>/dashboard` (user `admin`, password `WAHA_API_KEY`), start
+   the session `default`, scan the QR code from the phone (Linked devices).
+   The API does the same: `POST /api/sessions {"name": "default"}` then
+   `GET /api/default/auth/qr` (a PNG), until `GET /api/sessions/default`
+   says `WORKING`.
+2. Find the group id: `GET /api/default/groups` with the `X-Api-Key` header.
+   Ids end with `@g.us`.
+3. Point the function at WAHA. Apprise's JSON plugin renames its `message`
+   key to `text`, adds `chatId` and `session`, drops its own keys and sends
+   the API key as a header:
+
+```
+NOTIFY_URLS="jsons://<waha host>/api/sendText?:message=text&:chatId=<group id>@g.us&:session=default&:version&:type&:title&+X-Api-Key=<WAHA_API_KEY>"
+```
+
+WAHA expects `{"session", "chatId", "text"}` on `POST /api/sendText`. The
+title is dropped because WhatsApp has no title field; put it in the body if
+needed. Several destinations still work: `NOTIFY_URLS="jsons://...,slack://..."`.
+
 ## Deploy on the platform
 
 ```sh
