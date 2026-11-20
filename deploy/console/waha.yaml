@@ -1,0 +1,38 @@
+# WAHA (unofficial WhatsApp Web client behind a REST API) as a Serverless
+# container. Paste in the console: Create, "Import a spec". Replace <KEY>
+# twice with a long random string (uuidgen | tr -d -).
+# One instance kept alive: the WhatsApp session lives in memory, a restart
+# or a new revision means scanning the QR code again.
+apiVersion: serverless.ovhcloud.com/v1
+kind: Container
+metadata:
+  name: demo-waha
+  region: EU-WEST-PAR
+spec:
+  template:
+    image: devlikeapro/waha:noweb
+    port: 3000
+    protocols:
+      - http
+    requestTimeoutSeconds: 60
+    billing: instance
+    resources:
+      cpu: 1 vCPU
+      memory: 1 GiB
+    env:
+      - name: WHATSAPP_DEFAULT_ENGINE
+        value: NOWEB
+      - name: WAHA_CLIENT_DEVICE_NAME
+        value: OVHcloud Serverless notify
+      - name: WAHA_DASHBOARD_USERNAME
+        value: admin
+      - name: WAHA_DASHBOARD_PASSWORD
+        value: <KEY>
+      - name: WAHA_API_KEY
+        value: <KEY>
+  scaling:
+    mode: auto
+    minInstances: 1
+    maxInstances: 1
+    concurrency: 80
+    idleTimeoutMinutes: 5

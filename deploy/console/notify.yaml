@@ -1,0 +1,38 @@
+# The notify function, deployed from this repository. Paste in the console:
+# Create, "Import a spec". NOTIFY_URLS is a secret reference: the console asks
+# for its value after the import. For the WAHA demo the value is
+#   jsons://<waha host>/api/sendText?:message=text&:chatId=<group id>@g.us&:session=default&:version&:type&:title&+X-Api-Key=<KEY>
+# (see README, "Send to a WhatsApp group with WAHA").
+apiVersion: serverless.ovhcloud.com/v1
+kind: Function
+metadata:
+  name: demo-notify
+  region: EU-WEST-PAR
+spec:
+  template:
+    source:
+      runtime: Python 3.12
+      entrypoint: main
+      origin: repo
+      repository:
+        url: https://github.com/antonin-a/serverless-fn-notify
+        ref: main
+    protocols:
+      - http
+    requestTimeoutSeconds: 60
+    billing: request
+    resources:
+      cpu: 1 vCPU
+      memory: 512 MiB
+    env:
+      - name: NOTIFY_TITLE
+        value: OVHcloud Serverless
+      - name: NOTIFY_URLS
+        secretRef: notify_urls
+        version: 1
+  scaling:
+    mode: auto
+    minInstances: 0
+    maxInstances: 5
+    concurrency: 10
+    idleTimeoutMinutes: 1
