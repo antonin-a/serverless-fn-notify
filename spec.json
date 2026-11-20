@@ -1,0 +1,25 @@
+{
+  "name": "demo-notify",
+  "region": "EU-WEST-PAR",
+  "template": {
+    "function": {
+      "runtime": "python3.12",
+      "entrypoint": "main",
+      "source": {
+        "sourceOrigin": "REPO",
+        "repository": {
+          "url": "https://github.com/antonin-a/serverless-fn-notify",
+          "ref": "main"
+        }
+      },
+      "env": [
+        { "name": "NOTIFY_TITLE", "value": "OVHcloud Serverless" }
+      ],
+      "secrets": [
+        { "name": "NOTIFY_URLS", "value": "<Apprise URLs, set at deploy time, never committed>" }
+      ],
+      "resources": { "cpu": 1, "memory": 512 }
+    }
+  },
+  "scaling": { "mode": "AUTO", "minInstances": 0, "maxInstances": 5, "idleTimeoutSeconds": 60 }
+}

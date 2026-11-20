@@ -1,0 +1,37 @@
+{
+  "targetSpec": {
+    "name": "{{NAME}}",
+    "region": "{{REGION}}",
+    "template": {
+      "function": {
+        "runtime": "python3.12",
+        "entrypoint": "main",
+        "source": {
+          "sourceOrigin": "REPO",
+          "repository": {
+            "url": "{{REPO_URL}}",
+            "ref": "{{REF}}"
+          }
+        },
+        "env": [
+          { "name": "NOTIFY_TITLE", "value": "{{NOTIFY_TITLE}}" },
+          { "name": "NOTIFY_RELEASE", "value": "{{RELEASE}}" }
+        ],
+        "secrets": [
+          { "name": "NOTIFY_URLS", "value": "{{NOTIFY_URLS}}" }
+        ]
+      }
+    },
+    "scaling": {
+      "mode": "AUTO",
+      "minInstances": 0,
+      "maxInstances": 5,
+      "concurrencyTarget": 10,
+      "idleTimeoutSeconds": 60
+    },
+    "traffic": [
+      { "latest": true, "weight": 100 }
+    ],
+    "rollbackErrorThreshold": 5
+  }
+}
