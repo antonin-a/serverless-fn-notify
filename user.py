@@ -72,8 +72,25 @@ def _destinations() -> apprise.Apprise:
     return a
 
 
+def _safe_url(server) -> str:
+    """Apprise masks the credentials of a URL, but not the custom headers
+    (+Key=value) and pass-through parameters (-key=value) of the JSON, XML and
+    Form plugins, where an API key usually travels: redact those too."""
+    url = server.url(privacy=True)
+    base, sep, query = url.partition("?")
+    if not sep:
+        return url
+    parts = []
+    for item in query.split("&"):
+        key, eq, value = item.partition("=")
+        if eq and key.startswith(("+", "-", "%2B", "%2D")):
+            value = "***"
+        parts.append(f"{key}{eq}{value}")
+    return base + "?" + "&".join(parts)
+
+
 def _masked(a: apprise.Apprise) -> list[dict]:
-    return [{"service": s.service_name, "url": s.url(privacy=True)} for s in a]
+    return [{"service": s.service_name, "url": _safe_url(s)} for s in a]
 
 
 def _normalise(payload: dict) -> tuple[str, str, str]:
@@ -117,7 +134,7 @@ def _send(message_id: str, title: str, body: str) -> dict:
             if ok:
                 break
             time.sleep(0.5 * tries)
-        results.append({"service": server.service_name, "url": server.url(privacy=True), "ok": ok, "attempts": tries})
+        results.append({"service": server.service_name, "url": _safe_url(server), "ok": ok, "attempts": tries})
     sent = bool(results) and all(r["ok"] for r in results)
     if sent:
         _SENT += 1
