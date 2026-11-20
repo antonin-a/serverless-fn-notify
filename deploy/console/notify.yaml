@@ -11,7 +11,7 @@ metadata:
 spec:
   template:
     source:
-      runtime: Python 3.12
+      runtime: python3.12
       entrypoint: main
       origin: repo
       repository:
